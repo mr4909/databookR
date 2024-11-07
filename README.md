@@ -11,7 +11,7 @@ You can install the development version of **justiceR** from GitHub using the `d
 install.packages("devtools")
 
 # Install justiceR from GitHub
-devtools::install_github("yourusername/justiceR")
+devtools::install_github("mr4909/justiceR")
 ```
 
 # Features
