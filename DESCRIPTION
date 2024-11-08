@@ -18,4 +18,7 @@ Imports:
     kableExtra
 Suggests:
     testthat,
-    mockery
+    mockery,
+    rmarkdown,
+    devtools
+VignetteBuilder: knitr

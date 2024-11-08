@@ -1,0 +1,159 @@
+---
+title: "Introduction to justiceR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to justiceR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Set a CRAN mirror
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+```
+
+# Introduction to justiceR
+
+Welcome to **justiceR**, an R package that provides essential tools for criminal justice data analysis. The package is designed to simplify and enhance data-driven insights through functions that generate comprehensive codebooks, calculate key metrics, and create visualizations. As justiceR continues to evolve, more functions will be added to aid in criminal justice data analysis, making it a comprehensive resource for researchers and analysts.
+
+This vignette will walk you through the main features of the package, focusing on the `generate_codebook()` function and demonstrating its flexibility and utility in understanding the structure of your data.
+
+------------------------------------------------------------------------
+
+## Installation
+
+You can install the development version of **justiceR** from GitHub using the `devtools` package:
+
+```{r, eval = FALSE}
+# Install devtools if you haven't already
+install.packages("devtools")
+
+# Install justiceR from GitHub
+devtools::install_github("mr4909/justiceR")
+```
+
+Once installed, you can load the package:
+
+```{r}
+library(justiceR)
+```
+
+## Using generate_codebook()
+
+The `generate_codebook()` function is a powerful tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
+
+**Example Data** 
+To illustrate the functionality of `generate_codebook()`, let's start with a sample dataset:
+
+```{r}
+# Example data frame
+df <- data.frame(
+  age = c(25, 30, 22, 40, NA, 35, 28),
+  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
+  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
+  active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
+  crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
+)
+
+# Variable descriptions
+var_desc <- list(
+  age = "Age of the client",
+  gender = "Gender of the client",
+  start_date = "Date of supervision start date",
+  active = "Active status of the client",
+  crime_type = "Type of crime committed"
+)
+```
+
+### Basic Usage
+
+To generate a codebook for the dataset:
+
+```{r}
+# Generate codebook
+generate_codebook(df, var_descriptions = var_desc)
+```
+
+This will create a well-organized codebook summarizing each variable:
+
+-   **Numeric Variables:** Statistics such as minimum, average, median, maximum, and standard deviation.
+-   **Categorical Variables:** The most frequent categories and their percentages.
+-   **Logical Variables:** Counts and percentages of TRUE and FALSE values.
+-   **Date Variables:** The earliest and latest dates in the dataset.
+
+### Customizing Your Codebook
+
+**Hiding Sensitive Statistics** 
+For some datasets, you may want to hide statistics for variables containing personally identifiable or sensitive information. Use the hide_statistics parameter to conceal these statistics:
+
+```{r}
+# Hide statistics for the 'active' variable
+generate_codebook(
+  df, 
+  var_descriptions = var_desc, 
+  hide_statistics = c("active")
+)
+```
+
+Explanation: 
+The statistics for the active variable will be replaced with "Hidden" in the codebook, ensuring sensitive data is not exposed.
+
+### Customizing the Number of Top Categories
+
+The `generate_codebook()` function allows you to specify how many top categories should be displayed for categorical variables using the top_n parameter. By default, it shows the top 5 categories, but you can customize this to suit your needs.
+
+```{r}
+# Show only the top 2 categories for categorical variables
+generate_codebook(
+  df, 
+  var_descriptions = var_desc, 
+  top_n = 2
+)
+```
+
+Explanation: 
+Up to 2 top categories for each categorical variable will be displayed. If a variable has fewer than 2 categories, all categories will be shown.
+
+### Advanced Example
+
+Here's a more complex example demonstrating the flexibility of the `generate_codebook()` function:
+
+```{r}
+# Comprehensive data frame
+df <- data.frame(
+  age = c(25, 30, 22, 40, NA, 35, 28),
+  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
+  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
+  active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
+  crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
+)
+
+# Detailed variable descriptions
+var_desc <- list(
+  age = "Age of the client",
+  gender = "Gender of the client",
+  start_date = "Date of supervision start date",
+  active = "Active status of the client",
+  crime_type = "Type of crime committed"
+)
+
+# Generate a detailed codebook
+generate_codebook(
+  df, 
+  var_descriptions = var_desc, 
+  hide_statistics = c("active"), 
+  top_n = 3
+)
+```
+
+Explanation: 
+In this example, statistics for the active variable are hidden, and only the top 3 categories are displayed for categorical variables like gender and crime_type. This level of customization allows you to tailor the codebook to your specific needs.
+
+# Conclusion
+
+The `generate_codebook()` function in justiceR is a versatile and powerful tool for exploring and documenting your data. It provides a detailed overview of your dataset's structure, helping you identify patterns and potential issues before deeper analysis. As justiceR continues to evolve, more functions will be added to aid in criminal justice data analysis, making it a comprehensive resource for researchers and analysts.
+
+# Contact and Support
+
+Developed by Mari Roberts. For questions, feedback, or to report issues, please contact [mroberts\@csg.org](mailto:mroberts@csg.org){.email}.
