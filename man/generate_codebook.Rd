@@ -2,16 +2,47 @@
 % Please edit documentation in R/generate_codebook.R
 \name{generate_codebook}
 \alias{generate_codebook}
-\title{Generate a Codebook}
+\title{Generate a Codebook for a Data Frame}
 \usage{
-generate_codebook(data)
+generate_codebook(
+  df,
+  var_descriptions = NULL,
+  hide_statistics = NULL,
+  top_n = 5
+)
 }
 \arguments{
-\item{data}{A data frame for which to generate the codebook.}
+\item{df}{A data frame for which to generate the codebook.}
+
+\item{var_descriptions}{An optional named list providing descriptions for variables.}
+
+\item{hide_statistics}{An optional character vector of column names for which statistics should be hidden. This is particularly useful for personally identifiable information.}
+
+\item{top_n}{An integer specifying the number of top categories to display for categorical variables. Default is 5.}
 }
 \value{
-A data frame or list containing variable descriptions.
+A formatted codebook as a \code{reactable} or \code{kable} object.
 }
 \description{
-This function creates a codebook for a given dataset.
+This function generates a codebook summarizing the variables in a data frame, including
+statistics for numeric, categorical, logical, and date variables. The codebook can be output
+in either \code{reactable} or \code{kable} format.
+}
+\examples{
+\dontrun{
+df <- data.frame(
+  age = c(25, 30, 22, 40, NA),
+  gender = factor(c("Male", "Female", "Female", "Male", NA)),
+  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, NA, "2020-04-20")),
+  active = c(TRUE, FALSE, TRUE, NA, FALSE)
+)
+var_desc <- list(
+  age = "Age of the client",
+  gender = "Gender of the client",
+  start_date = "Date of supervision start date",
+  active = "Active status of the client"
+)
+generate_codebook(df, var_descriptions = var_desc)
+}
+
 }
