@@ -1,6 +1,6 @@
 # justiceR
 
-**justiceR** is an R package that provides tools for criminal justice data analysis, offering a range of functions to simplify and enhance data-driven insights in this field. The package is being developed to include functions for calculating key metrics, creating visualizations, and more. As the package grows, it will become an essential resource for researchers and analysts working in the realm of criminal justice.
+**justiceR** is an R package that provides tools for criminal justice data analysis, offering a range of functions to simplify and enhance data-driven insights in this field.
 
 ## Installation
 

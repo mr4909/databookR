@@ -234,7 +234,7 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
     }
   }
 
-  ### 2. Advanced Error Handling for 'top_n' ###
+  ### 2. Error Handling for 'top_n' ###
 
   # a. Capture the unevaluated expression passed to 'top_n'
   top_n_expr <- substitute(top_n)
