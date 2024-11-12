@@ -16,7 +16,7 @@ devtools::install_github("mr4909/justiceR")
 
 ## generate_codebook()
 
-The `generate_codebook()` function is a powerful tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
+The `generate_codebook()` function is a tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
 
 **Key Features:**
 
