@@ -91,5 +91,5 @@ This package is licensed under the GPL-3 license. See the LICENSE file for more 
 
 # Contact and Support
 
-Developed by Mari Roberts. For questions, feedback, or to report issues, please contact [mroberts\@csg.org](mailto:mroberts@csg.org){.email}.
+Developed by Mari Roberts. For questions, feedback, or to report issues, please contact [mroberts\@csg.org](mailto:mroberts@csg.org)
 
