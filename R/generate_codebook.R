@@ -141,12 +141,14 @@ get_logical_stats <- function(var) {
 #'
 #' This function generates a codebook summarizing the variables in a data frame, including
 #' statistics for numeric, categorical, logical, and date variables. The codebook can be output
-#' in either `reactable` or `kable` format.
+#' in either `reactable` or `kable` format, with support for merging additional metadata.
 #'
 #' @param df A data frame for which to generate the codebook.
-#' @param var_descriptions An optional named list providing descriptions for variables.
-#' @param hide_statistics An optional character vector of column names for which statistics should be hidden. This is particularly useful for personally identifiable information.
+#' @param var_descriptions An optional named atomic vector providing descriptions for variables.
+#' @param hide_statistics An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.
 #' @param top_n An integer specifying the number of top categories to display for categorical variables. Default is 5.
+#' @param extra_vars An optional data frame to merge additional metadata, such as descriptions or field types.
+#' @param extra_key A character specifying the column used for merging the `extra_vars` table.
 #'
 #' @return A formatted codebook as a `reactable` or `kable` object.
 #'
@@ -158,7 +160,7 @@ get_logical_stats <- function(var) {
 #'   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, NA, "2020-04-20")),
 #'   active = c(TRUE, FALSE, TRUE, NA, FALSE)
 #' )
-#' var_desc <- list(
+#' var_desc <- c(
 #'   age = "Age of the client",
 #'   gender = "Gender of the client",
 #'   start_date = "Date of supervision start date",
@@ -173,9 +175,9 @@ get_logical_stats <- function(var) {
 #' @importFrom htmltools HTML
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
-#' @importFrom progress progress_bar
 #' @export
-generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NULL, top_n = 5) {
+generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NULL,
+                              top_n = 5, extra_vars = NULL, extra_key = NULL) {
 
   ### 1. Input Validation ###
 
@@ -189,23 +191,14 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
   }
 
   # Check for list-columns or nested data frames
-  list_cols <- sapply(df, is.list)
-  if (any(list_cols)) {
+  if (any(sapply(df, is.list))) {
     stop("Error: The data frame 'df' contains list-columns, which are not supported.")
   }
 
-  # b. Check for duplicate column names in 'df'
-  if (any(duplicated(names(df)))) {
-    duplicated_cols <- names(df)[duplicated(names(df))]
-    stop(paste("Error: The data frame 'df' contains duplicate column names:",
-               paste(unique(duplicated_cols), collapse = ", "),
-               ". Please ensure all column names are unique."))
-  }
-
-  # c. Validate 'var_descriptions'
+  # b. Validate 'var_descriptions'
   if (!is.null(var_descriptions)) {
-    if (!is.list(var_descriptions)) {
-      stop("Error: The input 'var_descriptions' must be a named list.")
+    if (!is.atomic(var_descriptions) || !is.character(var_descriptions)) {
+      stop("Error: 'var_descriptions' must be a named atomic character vector.")
     }
     if (is.null(names(var_descriptions)) || any(names(var_descriptions) == "")) {
       stop("Error: All elements in 'var_descriptions' must be named, corresponding to column names in 'df'.")
@@ -215,65 +208,22 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
       stop(paste("Error: The following names in 'var_descriptions' do not match any columns in 'df':",
                  paste(invalid_desc_names, collapse = ", ")))
     }
-    # Check for non-character or NULL descriptions
-    invalid_desc <- sapply(var_descriptions, function(desc) !is.character(desc) || length(desc) != 1 || is.na(desc))
-    if (any(invalid_desc)) {
-      stop("Error: All descriptions in 'var_descriptions' must be single, non-empty character strings.")
+  }
+
+  # c. Validate 'extra_vars' and 'extra_key'
+  if (!is.null(extra_vars)) {
+    if (!is.data.frame(extra_vars)) {
+      stop("Error: 'extra_vars' must be a data frame.")
+    }
+    if (is.null(extra_key) || !extra_key %in% names(extra_vars)) {
+      stop("Error: 'extra_key' must be a column name in 'extra_vars'.")
     }
   }
 
-  # d. Validate 'hide_statistics'
-  if (!is.null(hide_statistics)) {
-    if (!is.character(hide_statistics)) {
-      stop("Error: The input 'hide_statistics' must be a character vector of column names.")
-    }
-    invalid_hide <- setdiff(hide_statistics, names(df))
-    if (length(invalid_hide) > 0) {
-      stop(paste("Error: The following names in 'hide_statistics' do not match any columns in 'df':",
-                 paste(invalid_hide, collapse = ", ")))
-    }
-  }
-
-  ### 2. Error Handling for 'top_n' ###
-
-  # a. Capture the unevaluated expression passed to 'top_n'
-  top_n_expr <- substitute(top_n)
-
-  # b. Evaluate 'top_n' within the parent environment
-  top_n_val <- tryCatch(
-    eval(top_n_expr, envir = parent.frame()),
-    error = function(e) {
-      stop("Error: 'top_n' must be a single positive integer. It appears you have passed an undefined variable or a non-numeric value. Please provide a valid numeric value, e.g., top_n = 3.")
-    }
-  )
-
-  # c. Validate the evaluated 'top_n' value
-  if (!is.numeric(top_n_val) || length(top_n_val) != 1 || top_n_val < 1 || top_n_val != as.integer(top_n_val)) {
-    stop("Error: 'top_n' must be a single positive integer. Please provide a valid numeric value, e.g., top_n = 3.")
-  }
-
-  ### 3. Progress Bar ###
-
-  if (requireNamespace("progress", quietly = TRUE)) {
-    use_progress <- TRUE
-    pb <- progress::progress_bar$new(
-      format = "  Processing [:bar] :percent eta: :eta",
-      total = ncol(df), clear = FALSE, width = 60
-    )
-  } else {
-    use_progress <- FALSE
-    message("Package 'progress' not found. Progress bar will be disabled.")
-  }
-
-  ### 4. Process Each Column to Build the Codebook ###
+  ### 2. Process Each Column to Build the Codebook ###
 
   codebook <- lapply(names(df), function(colname) {
     var <- df[[colname]]
-
-    # Update progress bar
-    if (use_progress) {
-      pb$tick()
-    }
 
     # a. Variable Description
     var_desc <- if (!is.null(var_descriptions) && !is.null(var_descriptions[[colname]])) {
@@ -295,7 +245,7 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
     stats <- if (is.numeric(var)) {
       get_numeric_stats(var)
     } else if (is.factor(var) || is.character(var)) {
-      get_categorical_stats(var, top_n = top_n_val)
+      get_categorical_stats(var, top_n = top_n)
     } else if (inherits(var, "Date")) {
       get_date_stats(var)
     } else if (is.logical(var)) {
@@ -326,12 +276,17 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
 
   codebook <- dplyr::bind_rows(codebook)
 
-  ### 5. Formatting Column Names ###
+  ### 3. Merge Additional Metadata if Provided ###
+  if (!is.null(extra_vars)) {
+    codebook <- merge(codebook, extra_vars, by.x = "variable_name", by.y = extra_key, all.x = TRUE)
+  }
+
+  ### 4. Formatting Column Names ###
 
   codebook <- codebook %>%
     dplyr::rename_with(~ tools::toTitleCase(gsub("_", " ", .)), everything())
 
-  ### 6. Handle HTML in Statistics ###
+  ### 5. Handle HTML in Statistics ###
 
   codebook$Statistics <- lapply(codebook$Statistics, htmltools::HTML)
 
@@ -339,6 +294,4 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
     knitr::kable(codebook, format = "html", escape = FALSE) %>%
       kableExtra::kable_styling("striped", full_width = FALSE)
   )
-
 }
-
