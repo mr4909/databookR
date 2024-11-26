@@ -1,5 +1,5 @@
 ---
-title: "Introduction to justiceR"
+title: "justiceR: A Codebook Generator"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to justiceR}
@@ -15,9 +15,9 @@ options(repos = c(CRAN = "https://cran.rstudio.com"))
 
 # Introduction to justiceR
 
-Welcome to **justiceR**, an R package that provides essential tools for criminal justice data analysis. The package is designed to simplify and enhance data-driven insights through functions that generate comprehensive codebooks, calculate key metrics, and create visualizations. As justiceR continues to evolve, more functions will be added to aid in criminal justice data analysis, making it a comprehensive resource for researchers and analysts.
+**justiceR** is an R package designed to simplify the creation of detailed and customizable codebooks for datasets. Whether you're exploring a dataset for the first time or documenting it for publication, the `generate_codebook()` function provides a comprehensive overview of each variable, helping you understand the data's structure and potential issues.
 
-This vignette will walk you through the main features of the package, focusing on the `generate_codebook()` function and demonstrating its flexibility and utility in understanding the structure of your data.
+This vignette will introduce the features of `generate_codebook(`) and demonstrate its flexibility in handling numeric, categorical, date, and logical variables, as well as integrating additional metadata.
 
 ------------------------------------------------------------------------
 
@@ -105,25 +105,20 @@ generate_codebook(
 Explanation: 
 Up to 2 top categories for each categorical variable will be displayed. If a variable has fewer than 2 categories, all categories will be shown.
 
-### Advanced Example
+### ntegrating Additional Metadata
 
-Here's a more complex example demonstrating the flexibility of the `generate_codebook()` function:
+The `generate_codebook()` function allows you to include additional metadata about your variables, such as descriptions or notes. Use the `extra_vars` parameter to pass a data frame containing this metadata. Ensure the variable names in the dataset match the column specified in `extra_key`.
 
 ```{r}
-# Comprehensive data frame
-df <- data.frame(
-  age = c(25, 30, 22, 40, NA, 35, 28),
-  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
-  active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
-  crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
+# Additional metadata
+extra_vars <- data.frame(
+  VariableName = c("age", "start_date"),
+  Description = c("Age of the individual", "Date the individual started"),
+  Notes = c("Collected from surveys", "Derived from administrative records")
 )
 
-# Generate a detailed codebook
-generate_codebook(
-  df,
-  hide_statistics = c("active"),
-  top_n = 3
-)
+# Generate codebook with extra metadata
+generate_codebook(df, extra_vars = extra_vars, extra_key = "VariableName")
 ```
 
 Explanation: 
