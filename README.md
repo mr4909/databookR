@@ -11,7 +11,7 @@ You can install the development version of **justiceR** from GitHub using the `d
 install.packages("devtools")
 
 # Install justiceR from GitHub
-devtools::install_github("mr4909/justiceR")
+devtools::install_github("mr4909/justiceR@develop")
 ```
 
 ## generate_codebook()
@@ -33,21 +33,13 @@ library(justiceR)
 # Example data frame
 df <- data.frame(
   age = c(25, 30, 22, 40, NA, 35, 28),
-  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
   active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
   crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
 )
 
-var_desc <- list(
-  age = "Age of the client",
-  gender = "Gender of the client",
-  start_date = "Date of supervision start date",
-  active = "Active status of the client"
-)
-
-# Generate codebook
-generate_codebook(df, var_descriptions = var_desc)
+# Generate codebook with metadata
+generate_codebook(df)
 ```
 This will create a well-organized codebook summarizing each variable:
 
@@ -63,7 +55,6 @@ Suppose you want to hide the statistics for the active variable to protect sensi
 ``` r
 generate_codebook(
   df, 
-  var_descriptions = var_desc, 
   hide_statistics = c("active")
 )
 ```
@@ -78,12 +69,31 @@ By default, generate_codebook() displays the top 5 categories for categorical va
 # Decrease the number of top categories displayed for the 'gender' variable
 generate_codebook(
   df, 
-  var_descriptions = var_desc, 
   top_n = 2
 )
 ```
 
 **Output:** Up to 2 top categories for each categorical variable will be displayed. If a variable has fewer than the top_n categories, all categories will be shown.
+
+### Adding Additional Columns
+
+This produces a codebook that includes the descriptive statistics for each variable along with the metadata provided in extra_vars.
+
+``` r
+# Additional metadata
+extra_vars <- data.frame(
+  VariableName = c("age", "start_date"),
+  Description = c("Age of the individual", "Date supervision began"),
+  Notes = c("Collected from surveys", "Derived from administrative records")
+)
+
+# Generate codebook with metadata
+generate_codebook(df, extra_vars = extra_vars, extra_key = "VariableName")
+```
+
+- extra_vars: A data frame containing metadata such as descriptions and notes about the variables in your dataset.  
+- extra_key: The column in extra_vars that corresponds to the variable names in the dataset. In this example, it is VariableName.  
+
 
 # License
 
