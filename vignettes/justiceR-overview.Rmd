@@ -26,17 +26,17 @@ This vignette will walk you through the main features of the package, focusing o
 You can install the development version of **justiceR** from GitHub using the `devtools` package:
 
 ```{r, eval = FALSE}
-# Install devtools if you haven't already
-install.packages("devtools")
-
-# Install justiceR from GitHub
-devtools::install_github("mr4909/justiceR")
+# # Install devtools if you haven't already
+# install.packages("devtools")
+# 
+# # Install justiceR from GitHub
+# devtools::install_github("mr4909/justiceR")
 ```
 
 Once installed, you can load the package:
 
 ```{r}
-library(justiceR)
+# library(justiceR)
 ```
 
 ## Using generate_codebook()
@@ -47,23 +47,23 @@ The `generate_codebook()` function is a powerful tool for exploring and document
 To illustrate the functionality of `generate_codebook()`, let's start with a sample dataset:
 
 ```{r}
-# Example data frame
-df <- data.frame(
-  age = c(25, 30, 22, 40, NA, 35, 28),
-  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
-  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
-  active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
-  crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
-)
-
-# Variable descriptions
-var_desc <- list(
-  age = "Age of the client",
-  gender = "Gender of the client",
-  start_date = "Date of supervision start date",
-  active = "Active status of the client",
-  crime_type = "Type of crime committed"
-)
+# # Example data frame
+# df <- data.frame(
+#   age = c(25, 30, 22, 40, NA, 35, 28),
+#   gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
+#   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
+#   active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
+#   crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
+# )
+# 
+# # Variable descriptions
+# var_desc <- c(
+#   age = "Age of the client",
+#   gender = "Gender of the client",
+#   start_date = "Date of supervision start date",
+#   active = "Active status of the client",
+#   crime_type = "Type of crime committed"
+# )
 ```
 
 ### Basic Usage
@@ -71,8 +71,8 @@ var_desc <- list(
 To generate a codebook for the dataset:
 
 ```{r}
-# Generate codebook
-generate_codebook(df, var_descriptions = var_desc)
+# # Generate codebook
+# generate_codebook(df, var_descriptions = var_desc)
 ```
 
 This will create a well-organized codebook summarizing each variable:
@@ -88,12 +88,12 @@ This will create a well-organized codebook summarizing each variable:
 For some datasets, you may want to hide statistics for variables containing personally identifiable or sensitive information. Use the hide_statistics parameter to conceal these statistics:
 
 ```{r}
-# Hide statistics for the 'active' variable
-generate_codebook(
-  df, 
-  var_descriptions = var_desc, 
-  hide_statistics = c("active")
-)
+# # Hide statistics for the 'active' variable
+# generate_codebook(
+#   df, 
+#   var_descriptions = var_desc, 
+#   hide_statistics = c("active")
+# )
 ```
 
 Explanation: 
@@ -104,12 +104,12 @@ The statistics for the active variable will be replaced with "Hidden" in the cod
 The `generate_codebook()` function allows you to specify how many top categories should be displayed for categorical variables using the top_n parameter. By default, it shows the top 5 categories, but you can customize this to suit your needs.
 
 ```{r}
-# Show only the top 2 categories for categorical variables
-generate_codebook(
-  df, 
-  var_descriptions = var_desc, 
-  top_n = 2
-)
+# # Show only the top 2 categories for categorical variables
+# generate_codebook(
+#   df, 
+#   var_descriptions = var_desc, 
+#   top_n = 2
+# )
 ```
 
 Explanation: 
@@ -121,30 +121,30 @@ Here's a more complex example demonstrating the flexibility of the `generate_cod
 
 ```{r}
 # Comprehensive data frame
-df <- data.frame(
-  age = c(25, 30, 22, 40, NA, 35, 28),
-  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
-  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
-  active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
-  crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
-)
-
-# Detailed variable descriptions
-var_desc <- list(
-  age = "Age of the client",
-  gender = "Gender of the client",
-  start_date = "Date of supervision start date",
-  active = "Active status of the client",
-  crime_type = "Type of crime committed"
-)
-
-# Generate a detailed codebook
-generate_codebook(
-  df, 
-  var_descriptions = var_desc, 
-  hide_statistics = c("active"), 
-  top_n = 3
-)
+# df <- data.frame(
+#   age = c(25, 30, 22, 40, NA, 35, 28),
+#   gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
+#   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
+#   active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
+#   crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
+# )
+# 
+# # Detailed variable descriptions
+# var_desc <- c(
+#   age = "Age of the client",
+#   gender = "Gender of the client",
+#   start_date = "Date of supervision start date",
+#   active = "Active status of the client",
+#   crime_type = "Type of crime committed"
+# )
+# 
+# # Generate a detailed codebook
+# generate_codebook(
+#   df, 
+#   var_descriptions = var_desc, 
+#   hide_statistics = c("active"), 
+#   top_n = 3
+# )
 ```
 
 Explanation: 

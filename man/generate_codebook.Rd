@@ -8,17 +8,23 @@ generate_codebook(
   df,
   var_descriptions = NULL,
   hide_statistics = NULL,
-  top_n = 5
+  top_n = 5,
+  extra_vars = NULL,
+  extra_key = NULL
 )
 }
 \arguments{
 \item{df}{A data frame for which to generate the codebook.}
 
-\item{var_descriptions}{An optional named list providing descriptions for variables.}
+\item{var_descriptions}{An optional named atomic vector providing descriptions for variables.}
 
-\item{hide_statistics}{An optional character vector of column names for which statistics should be hidden. This is particularly useful for personally identifiable information.}
+\item{hide_statistics}{An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.}
 
 \item{top_n}{An integer specifying the number of top categories to display for categorical variables. Default is 5.}
+
+\item{extra_vars}{An optional data frame to merge additional metadata, such as descriptions or field types.}
+
+\item{extra_key}{A character specifying the column used for merging the \code{extra_vars} table.}
 }
 \value{
 A formatted codebook as a \code{reactable} or \code{kable} object.
@@ -26,7 +32,7 @@ A formatted codebook as a \code{reactable} or \code{kable} object.
 \description{
 This function generates a codebook summarizing the variables in a data frame, including
 statistics for numeric, categorical, logical, and date variables. The codebook can be output
-in either \code{reactable} or \code{kable} format.
+in either \code{reactable} or \code{kable} format, with support for merging additional metadata.
 }
 \examples{
 \dontrun{
@@ -36,7 +42,7 @@ df <- data.frame(
   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, NA, "2020-04-20")),
   active = c(TRUE, FALSE, TRUE, NA, FALSE)
 )
-var_desc <- list(
+var_desc <- c(
   age = "Age of the client",
   gender = "Gender of the client",
   start_date = "Date of supervision start date",
