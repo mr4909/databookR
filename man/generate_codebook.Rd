@@ -4,13 +4,7 @@
 \alias{generate_codebook}
 \title{Generate a Codebook for a Data Frame}
 \usage{
-generate_codebook(
-  df,
-  hide_statistics = NULL,
-  top_n = 5,
-  extra_vars = NULL,
-  extra_key = NULL
-)
+generate_codebook(df, hide_statistics = NULL, top_n = 5)
 }
 \arguments{
 \item{df}{A data frame for which to generate the codebook.}
@@ -18,10 +12,6 @@ generate_codebook(
 \item{hide_statistics}{An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.}
 
 \item{top_n}{An integer specifying the number of top categories to display for categorical variables. Default is 5.}
-
-\item{extra_vars}{An optional data frame to merge additional metadata, such as descriptions or field types.}
-
-\item{extra_key}{A character specifying the column used for merging the \code{extra_vars} table.}
 }
 \value{
 A formatted codebook as a \code{kable} object.
@@ -29,5 +19,5 @@ A formatted codebook as a \code{kable} object.
 \description{
 This function generates a codebook summarizing the variables in a data frame, including
 statistics for numeric, categorical, logical, and date variables. The codebook can be output
-in \code{kable} format, with support for merging additional metadata.
+in \code{kable} format.
 }
