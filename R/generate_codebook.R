@@ -141,42 +141,23 @@ get_logical_stats <- function(var) {
 #'
 #' This function generates a codebook summarizing the variables in a data frame, including
 #' statistics for numeric, categorical, logical, and date variables. The codebook can be output
-#' in either `reactable` or `kable` format, with support for merging additional metadata.
+#' in `kable` format, with support for merging additional metadata.
 #'
 #' @param df A data frame for which to generate the codebook.
-#' @param var_descriptions An optional named atomic vector providing descriptions for variables.
 #' @param hide_statistics An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.
 #' @param top_n An integer specifying the number of top categories to display for categorical variables. Default is 5.
 #' @param extra_vars An optional data frame to merge additional metadata, such as descriptions or field types.
 #' @param extra_key A character specifying the column used for merging the `extra_vars` table.
 #'
-#' @return A formatted codebook as a `reactable` or `kable` object.
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(
-#'   age = c(25, 30, 22, 40, NA),
-#'   gender = factor(c("Male", "Female", "Female", "Male", NA)),
-#'   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, NA, "2020-04-20")),
-#'   active = c(TRUE, FALSE, TRUE, NA, FALSE)
-#' )
-#' var_desc <- c(
-#'   age = "Age of the client",
-#'   gender = "Gender of the client",
-#'   start_date = "Date of supervision start date",
-#'   active = "Active status of the client"
-#' )
-#' generate_codebook(df, var_descriptions = var_desc)
-#' }
+#' @return A formatted codebook as a `kable` object.
 #'
 #' @importFrom dplyr bind_rows rename_with %>% everything
 #' @importFrom stats median sd
-#' @importFrom reactable reactable colDef
 #' @importFrom htmltools HTML
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
-generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NULL,
+generate_codebook <- function(df, hide_statistics = NULL,
                               top_n = 5, extra_vars = NULL, extra_key = NULL) {
 
   ### 1. Input Validation ###
@@ -195,22 +176,7 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
     stop("Error: The data frame 'df' contains list-columns, which are not supported.")
   }
 
-  # b. Validate 'var_descriptions'
-  if (!is.null(var_descriptions)) {
-    if (!is.atomic(var_descriptions) || !is.character(var_descriptions)) {
-      stop("Error: 'var_descriptions' must be a named atomic character vector.")
-    }
-    if (is.null(names(var_descriptions)) || any(names(var_descriptions) == "")) {
-      stop("Error: All elements in 'var_descriptions' must be named, corresponding to column names in 'df'.")
-    }
-    invalid_desc_names <- setdiff(names(var_descriptions), names(df))
-    if (length(invalid_desc_names) > 0) {
-      stop(paste("Error: The following names in 'var_descriptions' do not match any columns in 'df':",
-                 paste(invalid_desc_names, collapse = ", ")))
-    }
-  }
-
-  # c. Validate 'extra_vars' and 'extra_key'
+  # b. Validate 'extra_vars' and 'extra_key'
   if (!is.null(extra_vars)) {
     if (!is.data.frame(extra_vars)) {
       stop("Error: 'extra_vars' must be a data frame.")
@@ -225,23 +191,16 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
   codebook <- lapply(names(df), function(colname) {
     var <- df[[colname]]
 
-    # a. Variable Description
-    var_desc <- if (!is.null(var_descriptions) && !is.null(var_descriptions[[colname]])) {
-      var_descriptions[[colname]]
-    } else {
-      "Description needed."
-    }
-
-    # b. Variable Type
+    # a. Variable Type
     var_type <- class(var)[1]
 
-    # c. Number of Unique Values
+    # b. Number of Unique Values
     num_unique <- length(unique(var[!is.na(var)]))
 
-    # d. Missing Value Information
+    # c. Missing Value Information
     missing_info <- get_missing_info(var)
 
-    # e. Determine Statistics Based on Variable Type
+    # d. Determine Statistics Based on Variable Type
     stats <- if (is.numeric(var)) {
       get_numeric_stats(var)
     } else if (is.factor(var) || is.character(var)) {
@@ -254,7 +213,7 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
       "Unsupported type"
     }
 
-    # f. Hide Statistics if Specified
+    # e. Hide Statistics if Specified
     if (!is.null(hide_statistics) && colname %in% hide_statistics) {
       stats <- "Hidden"
       message(paste("Statistics for variable '", colname, "' are hidden.", sep = ""))
@@ -262,10 +221,9 @@ generate_codebook <- function(df, var_descriptions = NULL, hide_statistics = NUL
       message(paste("Variable '", colname, "' has an unsupported type and its statistics are not included.", sep = ""))
     }
 
-    # g. Compile into a Data Frame Row
+    # f. Compile into a Data Frame Row
     data.frame(
       variable_name = colname,
-      variable_description = var_desc,
       variable_type = var_type,
       number_of_unique_values = num_unique,
       percentage_missing = paste0(sprintf("%.1f", missing_info$percent_missing), "%"),

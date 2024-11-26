@@ -6,7 +6,6 @@
 \usage{
 generate_codebook(
   df,
-  var_descriptions = NULL,
   hide_statistics = NULL,
   top_n = 5,
   extra_vars = NULL,
@@ -15,8 +14,6 @@ generate_codebook(
 }
 \arguments{
 \item{df}{A data frame for which to generate the codebook.}
-
-\item{var_descriptions}{An optional named atomic vector providing descriptions for variables.}
 
 \item{hide_statistics}{An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.}
 
@@ -27,28 +24,10 @@ generate_codebook(
 \item{extra_key}{A character specifying the column used for merging the \code{extra_vars} table.}
 }
 \value{
-A formatted codebook as a \code{reactable} or \code{kable} object.
+A formatted codebook as a \code{kable} object.
 }
 \description{
 This function generates a codebook summarizing the variables in a data frame, including
 statistics for numeric, categorical, logical, and date variables. The codebook can be output
-in either \code{reactable} or \code{kable} format, with support for merging additional metadata.
-}
-\examples{
-\dontrun{
-df <- data.frame(
-  age = c(25, 30, 22, 40, NA),
-  gender = factor(c("Male", "Female", "Female", "Male", NA)),
-  start_date = as.Date(c("2020-01-01", "2020-02-15", NA, NA, "2020-04-20")),
-  active = c(TRUE, FALSE, TRUE, NA, FALSE)
-)
-var_desc <- c(
-  age = "Age of the client",
-  gender = "Gender of the client",
-  start_date = "Date of supervision start date",
-  active = "Active status of the client"
-)
-generate_codebook(df, var_descriptions = var_desc)
-}
-
+in \code{kable} format, with support for merging additional metadata.
 }
