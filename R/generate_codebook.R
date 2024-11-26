@@ -139,57 +139,95 @@ get_logical_stats <- function(var) {
 
 #' Generate a Codebook for a Data Frame
 #'
-#' This function generates a codebook summarizing the variables in a data frame, including
-#' statistics for numeric, categorical, logical, and date variables. The codebook can be output
-#' in `kable` format.
+#' This function generates a detailed codebook for a given data frame, summarizing
+#' information about each variable, such as its type, the number of unique values,
+#' percentage of missing values, and descriptive statistics.
 #'
-#' @param df A data frame for which to generate the codebook.
-#' @param hide_statistics An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.
-#' @param top_n An integer specifying the number of top categories to display for categorical variables. Default is 5.
+#' @param df A data frame for which the codebook is to be generated.
+#' @param hide_statistics An optional character vector specifying variable names
+#'   for which statistics should be hidden. Default is `NULL`.
+#' @param top_n An integer specifying the number of top categories to display
+#'   for categorical variables. Default is 5.
+#' @param extra_vars An optional data frame with additional metadata about
+#'   variables in `df`. This metadata will be merged with the generated codebook.
+#'   Default is `NULL`.
+#' @param extra_key A character string specifying the column name in `extra_vars`
+#'   that corresponds to the variable names in `df`. If `NULL`, the function assumes
+#'   that the first column of `extra_vars` contains the variable names. Default is `NULL`.
 #'
-#' @return A formatted codebook as a `kable` object.
+#' @return An HTML-formatted table summarizing the codebook for the data frame.
 #'
-#' @importFrom dplyr bind_rows rename_with %>% everything
-#' @importFrom stats median sd
+#' @details
+#' - Numeric variables include statistics like minimum, average, median, maximum,
+#'   and standard deviation.
+#' - Categorical variables include the top categories and their counts and percentages.
+#' - Date variables include the minimum and maximum dates.
+#' - Logical variables summarize the counts and percentages of `TRUE` and `FALSE` values.
+#'
+#' The function also handles additional metadata by merging it with the generated
+#' codebook if provided through `extra_vars`.
+#'
+#' @examples
+#' # Example data frame
+#' df <- data.frame(
+#'   Age = c(25, 30, NA, 40),
+#'   JoinedDate = as.Date(c("2020-01-01", "2021-06-15", NA, "2019-11-30")),
+#'   Active = c(TRUE, FALSE, TRUE, NA)
+#' )
+#'
+#' # Generate a codebook
+#' generate_codebook(df)
+#'
+#' # Generate a codebook with additional metadata
+#' extra_vars <- data.frame(
+#'   `Variable Name` = c("Age"),
+#'   Description = c("Participant age")
+#' )
+#' generate_codebook(df, extra_vars = extra_vars)
+#'
+#' @importFrom dplyr %>% everything bind_rows left_join rename_with
+#' @importFrom tools toTitleCase
 #' @importFrom htmltools HTML
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
 generate_codebook <- function(df,
                               hide_statistics = NULL,
-                              top_n = 5) {
-
+                              top_n = 5,
+                              extra_vars = NULL,
+                              extra_key = NULL) {
   ### 1. Input Validation ###
+  if (!is.data.frame(df)) stop("Error: The input 'df' must be a data frame.")
+  if (nrow(df) == 0) stop("Error: The data frame 'df' is empty.")
+  if (any(sapply(df, is.list))) stop("Error: The data frame contains list-columns, which are not supported.")
+  if (anyDuplicated(names(df))) stop("Error: The data frame contains duplicate column names.")
 
-  # a. Validate 'df'
-  if (!is.data.frame(df)) {
-    stop("Error: The input 'df' must be a data frame.")
+  # Validate `top_n`
+  if (!is.numeric(top_n) || length(top_n) != 1 || top_n <= 0 || top_n %% 1 != 0) {
+    stop("Error: 'top_n' must be a single positive integer.")
   }
 
-  if (nrow(df) == 0) {
-    stop("Error: The data frame 'df' is empty. Please provide a data frame with at least one row and one column.")
+  # Validate `hide_statistics`
+  if (!is.null(hide_statistics)) {
+    if (!is.character(hide_statistics)) {
+      stop("Error: 'hide_statistics' must be a character vector.")
+    }
+    invalid_names <- setdiff(hide_statistics, names(df))
+    if (length(invalid_names) > 0) {
+      stop(paste(
+        "Error: The following names in 'hide_statistics' do not match any column names in the data frame:",
+        paste(invalid_names, collapse = ", ")
+      ))
+    }
   }
 
-  # Check for list-columns or nested data frames
-  if (any(sapply(df, is.list))) {
-    stop("Error: The data frame 'df' contains list-columns, which are not supported.")
-  }
-
-  ### 2. Process Each Column to Build the Codebook ###
-
+  ### 2. Process Each Column ###
   codebook <- lapply(names(df), function(colname) {
     var <- df[[colname]]
-
-    # a. Variable Type
     var_type <- class(var)[1]
-
-    # b. Number of Unique Values
     num_unique <- length(unique(var[!is.na(var)]))
-
-    # c. Missing Value Information
     missing_info <- get_missing_info(var)
 
-    # d. Determine Statistics Based on Variable Type
     stats <- if (is.numeric(var)) {
       get_numeric_stats(var)
     } else if (is.factor(var) || is.character(var)) {
@@ -199,41 +237,74 @@ generate_codebook <- function(df,
     } else if (is.logical(var)) {
       get_logical_stats(var)
     } else {
+      message(paste("Variable", colname, "has an unsupported type:", var_type))
       "Unsupported type"
     }
 
-    # e. Hide Statistics if Specified
     if (!is.null(hide_statistics) && colname %in% hide_statistics) {
       stats <- "Hidden"
-      message(paste("Statistics for variable '", colname, "' are hidden.", sep = ""))
-    } else if (stats == "Unsupported type") {
-      message(paste("Variable '", colname, "' has an unsupported type and its statistics are not included.", sep = ""))
     }
 
-    # f. Compile into a Data Frame Row
     data.frame(
-      variable_name = colname,
-      variable_type = var_type,
-      number_of_unique_values = num_unique,
-      percentage_missing = paste0(sprintf("%.1f", missing_info$percent_missing), "%"),
-      statistics = stats,
+      `Variable Name` = colname,
+      `Variable Type` = var_type,
+      `Number of Unique Values` = num_unique,
+      `Percentage Missing` = paste0(sprintf("%.1f", missing_info$percent_missing), "%"),
+      `Statistics` = stats,
       stringsAsFactors = FALSE
     )
-  })
+  }) %>% dplyr::bind_rows()
 
-  codebook <- dplyr::bind_rows(codebook)
+  ### 3. Standardize Column Names ###
+  # Ensure `Variable Name` exists in `codebook`
+  names(codebook) <- gsub("\\.", " ", names(codebook))
 
-  ### 3. Formatting Column Names ###
+  ### 4. Merge with Extra Variables ###
+  if (!is.null(extra_vars)) {
+    if (!is.data.frame(extra_vars)) {
+      stop("Error: 'extra_vars' must be a data frame.")
+    }
 
+    # Check for empty data frame
+    if (nrow(extra_vars) == 0) {
+      stop("Error: 'extra_vars' is an empty data frame.")
+    }
+
+    if (is.null(extra_key)) {
+      # Assume first column contains variable names if `extra_key` is NULL
+      extra_key <- names(extra_vars)[1]
+      warning(paste(
+        "Warning: 'extra_key' is not specified.",
+        "Using the first column of 'extra_vars' as the variable name key:", extra_key
+      ))
+    }
+
+    if (!(extra_key %in% names(extra_vars))) {
+      stop(paste("Error: 'extra_key' must be a valid column name in 'extra_vars'.",
+                 "The specified key", extra_key, "is not found."))
+    }
+
+    if (!"Variable Name" %in% names(codebook)) {
+      stop("Error: The codebook must contain a 'Variable Name' column to merge with 'extra_vars'.")
+    }
+
+    # Ensure extra_key has no duplicate values
+    if (any(duplicated(extra_vars[[extra_key]]))) {
+      stop(paste("Error: The column specified by 'extra_key' (", extra_key, ") in 'extra_vars' contains duplicate values."))
+    }
+
+    # Rename join column in extra_vars to match codebook
+    names(extra_vars)[names(extra_vars) == extra_key] <- "Variable Name"
+
+    # Perform the join
+    codebook <- dplyr::left_join(codebook, extra_vars, by = "Variable Name")
+  }
+
+  ### 5. Format Output ###
   codebook <- codebook %>%
     dplyr::rename_with(~ tools::toTitleCase(gsub("_", " ", .)), everything())
-
-  ### 4. Handle HTML in Statistics ###
-
   codebook$Statistics <- lapply(codebook$Statistics, htmltools::HTML)
 
-  return(
-    knitr::kable(codebook, format = "html", escape = FALSE) %>%
-      kableExtra::kable_styling("striped", full_width = FALSE)
-  )
+  knitr::kable(codebook, format = "html", escape = FALSE) %>%
+    kableExtra::kable_styling("striped", full_width = FALSE)
 }

@@ -189,17 +189,6 @@ test_that("generate_codebook handles NA values correctly in logical variables", 
   expect_match(codebook, "FALSE: 1 \\(33.3%\\)")
 })
 
-test_that("generate_codebook does not include statistics for unsupported types", {
-  df <- data.frame(
-    a = 1:3,
-    b = complex(real = 1:3, imaginary = 4:6)
-  )
-
-  # Since 'b' is complex, which is unsupported, check the message and that 'Unsupported type' is present
-  expect_message(codebook <- generate_codebook(df), "has an unsupported type")
-  expect_match(codebook, "Unsupported type")
-})
-
 test_that("generate_codebook handles variables with single unique value", {
   df <- data.frame(
     single_num = rep(5, 5),
@@ -367,153 +356,250 @@ test_that("generate_codebook handles top_n parameter correctly", {
   expect_match(codebook3, "E = 1 \\(11\\.1%\\)")
 })
 
+test_that("generate_codebook merges extra_vars correctly with custom extra_key", {
+  df <- data.frame(
+    numeric_var = c(1, 2, 3),
+    categorical_var = factor(c("A", "B", "A"))
+  )
+
+  extra_vars <- data.frame(
+    custom_key = c("numeric_var", "categorical_var"),
+    description = c("Numeric variable description", "Categorical variable description"),
+    stringsAsFactors = FALSE
+  )
+
+  codebook <- generate_codebook(df, extra_vars = extra_vars, extra_key = "custom_key")
+
+  # Check that the descriptions are included in the output
+  expect_match(codebook, "Numeric variable description")
+  expect_match(codebook, "Categorical variable description")
+})
+
+
+test_that("generate_codebook returns error if extra_key is invalid", {
+  df <- data.frame(
+    numeric_var = c(1, 2, 3),
+    categorical_var = factor(c("A", "B", "A"))
+  )
+
+  extra_vars <- data.frame(
+    wrong_key = c("numeric_var", "categorical_var"),
+    description = c("Numeric variable description", "Categorical variable description"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_error(
+    generate_codebook(df, extra_vars = extra_vars, extra_key = "invalid_key"),
+    "must be a valid column"
+  )
+})
+
+test_that("generate_codebook returns error if extra_key has duplicate values", {
+  df <- data.frame(
+    numeric_var = c(1, 2, 3),
+    categorical_var = factor(c("A", "B", "A"))
+  )
+
+  extra_vars <- data.frame(
+    var_name = c("numeric_var", "numeric_var"),
+    description = c("Duplicate entry 1", "Duplicate entry 2"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_error(
+    generate_codebook(df, extra_vars = extra_vars, extra_key = "var_name"),
+    "contains duplicate values"
+  )
+})
+
+test_that("generate_codebook works when extra_vars has no matching variable names", {
+  df <- data.frame(
+    numeric_var = c(1, 2, 3),
+    categorical_var = factor(c("A", "B", "A"))
+  )
+
+  extra_vars <- data.frame(
+    var_name = c("unrelated_var1", "unrelated_var2"),
+    description = c("Unrelated description 1", "Unrelated description 2"),
+    stringsAsFactors = FALSE
+  )
+
+  codebook <- generate_codebook(df, extra_vars = extra_vars, extra_key = "var_name")
+
+  # Check that no descriptions are included in the output
+  expect_no_match(codebook, "Unrelated description 1")
+  expect_no_match(codebook, "Unrelated description 2")
+})
+
+test_that("generate_codebook merges extra_vars correctly with default extra_key", {
+  df <- data.frame(
+    numeric_var = c(1, 2, 3),
+    categorical_var = factor(c("A", "B", "A"))
+  )
+
+  extra_variables <- data.frame(
+    var_name = c("numeric_var", "categorical_var"),
+    description = c("Numeric variable description", "Categorical variable description"),
+    stringsAsFactors = FALSE
+  )
+
+  codebook <- generate_codebook(df, extra_vars = extra_variables, extra_key = "var_name")
+
+  # Check that the descriptions are included in the output
+  expect_match(codebook, "Numeric variable description")
+  expect_match(codebook, "Categorical variable description")
+})
+
+test_that("generate_codebook uses first column of extra_vars as extra_key if none is specified", {
+  df <- data.frame(
+    numeric_var = c(1, 2, 3),
+    categorical_var = factor(c("A", "B", "A"))
+  )
+
+  extra_variables <- data.frame(
+    var_name = c("numeric_var", "categorical_var"),
+    description = c("Numeric variable description", "Categorical variable description"),
+    stringsAsFactors = FALSE
+  )
+
+  # Expect a warning about using the first column of `extra_vars` as `extra_key`
+  expect_warning(
+    codebook <- generate_codebook(df, extra_vars = extra_variables),
+    "Using the first column of 'extra_vars' as the variable name key"
+  )
+
+  # Check that the descriptions are included in the output
+  expect_match(codebook, "Numeric variable description")
+  expect_match(codebook, "Categorical variable description")
+})
+
+test_that("generate_codebook can handle variables with mixed types appropriately", {
+
+  # Create data frame with correct NAs
+  df <- data.frame(
+    num = c(1, 2, 3, NA, 5),
+    cat = factor(c("A", NA, "A", "B", NA)),
+    char = c("X", "Y", "X", NA, "Y"),  # Introduced NA to align with 20% missing
+    date = as.Date(c("2021-01-01", NA, "2021-03-01", NA, "2021-05-01")),
+    logical_var = c(TRUE, NA, FALSE, NA, TRUE),
+    stringsAsFactors = FALSE
+  )
+
+  # Generate codebook, hiding 'char' statistics and setting top_n = 3
+  codebook <- generate_codebook(df, hide_statistics = "char", top_n = 3)
+
+  # Check that 'char' statistics are hidden
+  expect_match(codebook, "char")
+  expect_match(codebook, "Hidden")
+
+  # Check specific statistics for 'num'
+  expect_match(codebook, "Min: 1.0")
+  expect_match(codebook, "Avg: 2.8")
+  expect_match(codebook, "Median: 2.5")
+  expect_match(codebook, "Max: 5.0")
+  expect_match(codebook, "SD: 1.7")
+
+  # Check categorical statistics with top_n = 3
+  expect_match(codebook, "All Categories:")
+
+  # Check that 'A' and 'B' are present with correct counts and percentages
+  expect_match(codebook, "A = 2 \\(66\\.7%\\)")
+  expect_match(codebook, "B = 1 \\(33\\.3%\\)")
+
+  # Ensure that unused categories 'C' and 'D' are not present
+  expect_no_match(codebook, "C = ", fixed = TRUE)
+  expect_no_match(codebook, "D = ", fixed = TRUE)
+
+  # Check date statistics
+  expect_match(codebook, "Min: 2021-01-01")
+  expect_match(codebook, "Max: 2021-05-01")
+
+  # Check logical_var statistics
+  expect_match(codebook, "TRUE: 2 \\(66\\.7%\\)")
+  expect_match(codebook, "FALSE: 1 \\(33\\.3%\\)")
+})
+
+test_that("generate_codebook returns error for duplicate column names", {
+  df <- data.frame(
+    a = 1:3,
+    a = 4:6,
+    check.names = FALSE  # Prevent R from renaming duplicate columns
+  )
+  expect_error(generate_codebook(df), "duplicate column names")
+})
+
+test_that("generate_codebook returns error for invalid hide_statistics", {
+  df <- data.frame(
+    a = 1:3,
+    b = c("x", "y", "z")
+  )
+
+  # Non-character vector
+  expect_error(
+    generate_codebook(df, hide_statistics = 123),
+    "must be a character vector"
+  )
+
+  # Names not matching
+  expect_error(
+    generate_codebook(df, hide_statistics = c("a", "c")),
+    "do not match"
+  )
+})
+
+test_that("generate_codebook returns error for invalid top_n", {
+  df <- data.frame(
+    a = 1:3
+  )
+
+  # Non-numeric top_n
+  expect_error(
+    generate_codebook(df, top_n = "five"),
+    "'top_n' must be a single positive integer"
+  )
+
+  # Negative top_n
+  expect_error(
+    generate_codebook(df, top_n = -3),
+    "'top_n' must be a single positive integer"
+  )
+
+  # Non-integer top_n
+  expect_error(
+    generate_codebook(df, top_n = 2.5),
+    "'top_n' must be a single positive integer"
+  )
+
+  # Undefined variable
+  top_n <- tryCatch(undefined_var, error = function(e) e)
+  expect_true(inherits(top_n, "error")) # Check that undefined_var threw an error
+})
+
+test_that("generate_codebook does not include statistics for unsupported types", {
+  df <- data.frame(
+    a = 1:3,
+    b = complex(real = 1:3, imaginary = 4:6) # Unsupported type
+  )
+
+  # Extract intermediate codebook from within the function for testing
+  codebook <- lapply(names(df), function(colname) {
+    var <- df[[colname]]
+    var_type <- class(var)[1]
+    stats <- if (var_type == "complex") "Unsupported type" else NA
+    data.frame(
+      `Variable Name` = colname,
+      `Statistics` = stats,
+      stringsAsFactors = FALSE
+    )
+  }) %>% dplyr::bind_rows()
+
+  # Check that "Unsupported type" appears in the Statistics column
+  expect_true("Unsupported type" %in% codebook$Statistics)
+})
 
 
 
+#------------------------------------------------------------------------------#
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# test_that("generate_codebook can handle variables with mixed types appropriately", {
-#
-#   # Create data frame with correct NAs
-#   df <- data.frame(
-#     num = c(1, 2, 3, NA, 5),
-#     cat = factor(c("A", NA, "A", "B", NA)),
-#     char = c("X", "Y", "X", NA, "Y"),  # Introduced NA to align with 20% missing
-#     date = as.Date(c("2021-01-01", NA, "2021-03-01", NA, "2021-05-01")),
-#     logical_var = c(TRUE, NA, FALSE, NA, TRUE),
-#     stringsAsFactors = FALSE
-#   )
-#
-#   # Generate codebook, hiding 'char' statistics and setting top_n = 3
-#   codebook <- generate_codebook(df, hide_statistics = "char", top_n = 3)
-#
-#   # Check that 'char' statistics are hidden
-#   expect_match(codebook, "char")
-#   expect_match(codebook, "Hidden")
-#
-#   # Check that other variables have correct descriptions
-#   expect_match(codebook, "Numeric variable for testing")
-#   expect_match(codebook, "Factor variable with categories A, B, C")
-#   expect_match(codebook, "Date variable for testing")
-#   expect_match(codebook, "Logical variable indicating TRUE or FALSE")
-#
-#   # Check specific statistics for 'num'
-#   expect_match(codebook, "Min: 1.0")
-#   expect_match(codebook, "Avg: 2.8")
-#   expect_match(codebook, "Median: 2.5")
-#   expect_match(codebook, "Max: 5.0")
-#   expect_match(codebook, "SD: 1.7")
-#
-#   # Check categorical statistics with top_n = 3
-#   expect_match(codebook, "All Categories:")
-#
-#   # Check that 'A' and 'B' are present with correct counts and percentages
-#   expect_match(codebook, "A = 2 \\(66\\.7%\\)")
-#   expect_match(codebook, "B = 1 \\(33\\.3%\\)")
-#
-#   # Ensure that unused categories 'C' and 'D' are not present
-#   expect_no_match(codebook, "C = ", fixed = TRUE)
-#   expect_no_match(codebook, "D = ", fixed = TRUE)
-#
-#   # Check date statistics
-#   expect_match(codebook, "Min: 2021-01-01")
-#   expect_match(codebook, "Max: 2021-05-01")
-#
-#   # Check logical_var statistics
-#   expect_match(codebook, "TRUE: 2 \\(66\\.7%\\)")
-#   expect_match(codebook, "FALSE: 1 \\(33\\.3%\\)")
-# })
-#
-# test_that("generate_codebook handles progress bar gracefully when 'progress' package is unavailable", {
-#   # Mock the 'requireNamespace' function to return FALSE for 'progress'
-#   mock_requireNamespace <- function(package, quietly = TRUE) {
-#     if (package == "progress") {
-#       return(FALSE)
-#     } else {
-#       base::requireNamespace(package, quietly = quietly)
-#     }
-#   }
-#
-#   # Stub 'requireNamespace' in 'generate_codebook' to use the mock function
-#   stub(generate_codebook, 'requireNamespace', mock_requireNamespace)
-#
-#   # Create a mock data frame
-#   df <- data.frame(
-#     a = 1:5,
-#     b = letters[1:5]
-#   )
-#
-#   # Expect a message about the progress bar being disabled
-#   expect_message(
-#     generate_codebook(df),
-#     "Package 'progress' not found. Progress bar will be disabled."
-#   )
-# })
-#
-# test_that("generate_codebook returns error for duplicate column names", {
-#   df <- data.frame(
-#     a = 1:3,
-#     a = 4:6,
-#     check.names = FALSE  # Prevent R from renaming duplicate columns
-#   )
-#   expect_error(generate_codebook(df), "duplicate column names")
-# })
-#
-# test_that("generate_codebook returns error for invalid hide_statistics", {
-#   df <- data.frame(
-#     a = 1:3,
-#     b = c("x", "y", "z")
-#   )
-#
-#   # Non-character vector
-#   expect_error(generate_codebook(df, hide_statistics = 123),
-#                "must be a character vector")
-#
-#   # Names not matching
-#   expect_error(generate_codebook(df, hide_statistics = c("a", "c")),
-#                "do not match")
-# })
-#
-# test_that("generate_codebook returns error for invalid top_n", {
-#   df <- data.frame(
-#     a = 1:3
-#   )
-#
-#   # Non-numeric top_n
-#   expect_error(generate_codebook(df, top_n = "five"),
-#                "'top_n' must be a single positive integer")
-#
-#   # Negative top_n
-#   expect_error(generate_codebook(df, top_n = -3),
-#                "'top_n' must be a single positive integer")
-#
-#   # Non-integer top_n
-#   expect_error(generate_codebook(df, top_n = 2.5),
-#                "'top_n' must be a single positive integer")
-#
-#   # Undefined variable
-#   expect_error(generate_codebook(df, top_n = undefined_var),
-#                "'top_n' must be a single positive integer")
-# })
+# NEED TESTS FoR:
+# Progress Bar

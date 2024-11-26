@@ -25,18 +25,20 @@ This vignette will walk you through the main features of the package, focusing o
 
 You can install the development version of **justiceR** from GitHub using the `devtools` package:
 
-```{r, eval = FALSE}
+```{r eval=FALSE, include=FALSE}
 # Install devtools if you haven't already
 install.packages("devtools")
 
 # Install justiceR from GitHub
-devtools::install_github("mr4909/justiceR")
+devtools::install_github("mr4909/justiceR@develop")
 ```
 
 Once installed, you can load the package:
 
 ```{r}
 library(justiceR)
+# Explicitly load all functions for vignette builds
+devtools::load_all()
 ```
 
 ## Using generate_codebook()
@@ -50,7 +52,6 @@ To illustrate the functionality of `generate_codebook()`, let's start with a sam
 # Example data frame
 df <- data.frame(
   age = c(25, 30, 22, 40, NA, 35, 28),
-  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
   active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
   crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
@@ -112,19 +113,9 @@ Here's a more complex example demonstrating the flexibility of the `generate_cod
 # Comprehensive data frame
 df <- data.frame(
   age = c(25, 30, 22, 40, NA, 35, 28),
-  gender = factor(c("Male", "Female", "Female", "Male", "Non-binary", "Female", "Male")),
   start_date = as.Date(c("2020-01-01", "2020-02-15", NA, "2020-03-10", "2020-04-20", "2020-05-25", "2020-06-30")),
   active = c(TRUE, FALSE, TRUE, FALSE, TRUE, NA, FALSE),
   crime_type = factor(c("Theft", "Assault", "Theft", "Fraud", "Assault", "Theft", "Robbery"))
-)
-
-# Detailed variable descriptions
-var_desc <- c(
-  age = "Age of the client",
-  gender = "Gender of the client",
-  start_date = "Date of supervision start date",
-  active = "Active status of the client",
-  crime_type = "Type of crime committed"
 )
 
 # Generate a detailed codebook

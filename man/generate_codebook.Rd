@@ -4,20 +4,67 @@
 \alias{generate_codebook}
 \title{Generate a Codebook for a Data Frame}
 \usage{
-generate_codebook(df, hide_statistics = NULL, top_n = 5)
+generate_codebook(
+  df,
+  hide_statistics = NULL,
+  top_n = 5,
+  extra_vars = NULL,
+  extra_key = NULL
+)
 }
 \arguments{
-\item{df}{A data frame for which to generate the codebook.}
+\item{df}{A data frame for which the codebook is to be generated.}
 
-\item{hide_statistics}{An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.}
+\item{hide_statistics}{An optional character vector specifying variable names
+for which statistics should be hidden. Default is \code{NULL}.}
 
-\item{top_n}{An integer specifying the number of top categories to display for categorical variables. Default is 5.}
+\item{top_n}{An integer specifying the number of top categories to display
+for categorical variables. Default is 5.}
+
+\item{extra_vars}{An optional data frame with additional metadata about
+variables in \code{df}. This metadata will be merged with the generated codebook.
+Default is \code{NULL}.}
+
+\item{extra_key}{A character string specifying the column name in \code{extra_vars}
+that corresponds to the variable names in \code{df}. If \code{NULL}, the function assumes
+that the first column of \code{extra_vars} contains the variable names. Default is \code{NULL}.}
 }
 \value{
-A formatted codebook as a \code{kable} object.
+An HTML-formatted table summarizing the codebook for the data frame.
 }
 \description{
-This function generates a codebook summarizing the variables in a data frame, including
-statistics for numeric, categorical, logical, and date variables. The codebook can be output
-in \code{kable} format.
+This function generates a detailed codebook for a given data frame, summarizing
+information about each variable, such as its type, the number of unique values,
+percentage of missing values, and descriptive statistics.
+}
+\details{
+\itemize{
+\item Numeric variables include statistics like minimum, average, median, maximum,
+and standard deviation.
+\item Categorical variables include the top categories and their counts and percentages.
+\item Date variables include the minimum and maximum dates.
+\item Logical variables summarize the counts and percentages of \code{TRUE} and \code{FALSE} values.
+}
+
+The function also handles additional metadata by merging it with the generated
+codebook if provided through \code{extra_vars}.
+}
+\examples{
+# Example data frame
+df <- data.frame(
+  Age = c(25, 30, NA, 40),
+  JoinedDate = as.Date(c("2020-01-01", "2021-06-15", NA, "2019-11-30")),
+  Active = c(TRUE, FALSE, TRUE, NA)
+)
+
+# Generate a codebook
+generate_codebook(df)
+
+# Generate a codebook with additional metadata
+extra_vars <- data.frame(
+  `Variable Name` = c("Age"),
+  Description = c("Participant age")
+)
+generate_codebook(df, extra_vars = extra_vars)
+
 }
