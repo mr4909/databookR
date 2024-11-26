@@ -141,13 +141,11 @@ get_logical_stats <- function(var) {
 #'
 #' This function generates a codebook summarizing the variables in a data frame, including
 #' statistics for numeric, categorical, logical, and date variables. The codebook can be output
-#' in `kable` format, with support for merging additional metadata.
+#' in `kable` format.
 #'
 #' @param df A data frame for which to generate the codebook.
 #' @param hide_statistics An optional character vector of column names for which statistics should be hidden. Useful for personally identifiable information.
 #' @param top_n An integer specifying the number of top categories to display for categorical variables. Default is 5.
-#' @param extra_vars An optional data frame to merge additional metadata, such as descriptions or field types.
-#' @param extra_key A character specifying the column used for merging the `extra_vars` table.
 #'
 #' @return A formatted codebook as a `kable` object.
 #'
@@ -157,8 +155,9 @@ get_logical_stats <- function(var) {
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
-generate_codebook <- function(df, hide_statistics = NULL,
-                              top_n = 5, extra_vars = NULL, extra_key = NULL) {
+generate_codebook <- function(df,
+                              hide_statistics = NULL,
+                              top_n = 5) {
 
   ### 1. Input Validation ###
 
@@ -174,16 +173,6 @@ generate_codebook <- function(df, hide_statistics = NULL,
   # Check for list-columns or nested data frames
   if (any(sapply(df, is.list))) {
     stop("Error: The data frame 'df' contains list-columns, which are not supported.")
-  }
-
-  # b. Validate 'extra_vars' and 'extra_key'
-  if (!is.null(extra_vars)) {
-    if (!is.data.frame(extra_vars)) {
-      stop("Error: 'extra_vars' must be a data frame.")
-    }
-    if (is.null(extra_key) || !extra_key %in% names(extra_vars)) {
-      stop("Error: 'extra_key' must be a column name in 'extra_vars'.")
-    }
   }
 
   ### 2. Process Each Column to Build the Codebook ###
@@ -234,17 +223,12 @@ generate_codebook <- function(df, hide_statistics = NULL,
 
   codebook <- dplyr::bind_rows(codebook)
 
-  ### 3. Merge Additional Metadata if Provided ###
-  if (!is.null(extra_vars)) {
-    codebook <- merge(codebook, extra_vars, by.x = "variable_name", by.y = extra_key, all.x = TRUE)
-  }
-
-  ### 4. Formatting Column Names ###
+  ### 3. Formatting Column Names ###
 
   codebook <- codebook %>%
     dplyr::rename_with(~ tools::toTitleCase(gsub("_", " ", .)), everything())
 
-  ### 5. Handle HTML in Statistics ###
+  ### 4. Handle HTML in Statistics ###
 
   codebook$Statistics <- lapply(codebook$Statistics, htmltools::HTML)
 
