@@ -66,7 +66,7 @@ generate_codebook(
 By default, generate_codebook() displays the top 5 categories for categorical variables. You can adjust this number using the top_n parameter:
 
 ``` r
-# Decrease the number of top categories displayed for the 'gender' variable
+# Decrease the number of top categories displayed for the 'crime_type' variable
 generate_codebook(
   df, 
   top_n = 2
