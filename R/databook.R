@@ -191,11 +191,11 @@ get_logical_stats <- function(var) {
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
- <- function(df,
-                              hide_statistics = NULL,
-                              top_n = 5,
-                              extra_vars = NULL,
-                              extra_key = NULL) {
+databook <- function(df,
+                     hide_statistics = NULL,
+                     top_n = 5,
+                     extra_vars = NULL,
+                     extra_key = NULL) {
   ### 1. Input Validation ###
   if (!is.data.frame(df)) stop("Error: The input 'df' must be a data frame.")
   if (nrow(df) == 0) stop("Error: The data frame 'df' is empty.")

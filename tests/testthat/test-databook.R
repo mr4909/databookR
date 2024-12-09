@@ -601,5 +601,5 @@ test_that("databook does not include statistics for unsupported types", {
 
 #------------------------------------------------------------------------------#
 
-# NEED TESTS FoR:
+# NEED TESTS FOR:
 # Progress Bar
