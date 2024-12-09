@@ -1,17 +1,17 @@
-# justiceR
+# databookR
 
-**justiceR** is an R package that provides tools for criminal justice data analysis, offering a range of functions to simplify and enhance data-driven insights in this field.
+**databookR** is an R package that provides tools for criminal justice data analysis, offering a range of functions to simplify and enhance data-driven insights in this field.
 
 ## Installation
 
-You can install the development version of **justiceR** from GitHub using the `devtools` package:
+You can install the development version of **databookR** from GitHub using the `devtools` package:
 
 ``` r
 # Install devtools if you haven't already
 install.packages("devtools")
 
-# Install justiceR from GitHub
-devtools::install_github("mr4909/justiceR@develop")
+# Install databookR from GitHub
+devtools::install_github("mr4909/databookR@develop")
 ```
 
 ## generate_codebook()
@@ -28,7 +28,7 @@ The `generate_codebook()` function is a tool for exploring and documenting your 
 -   Flexible Output Formats: Output codebooks in `kable` format for easy integration into reports and documents.
 
 ``` r
-library(justiceR)
+library(databookR)
 
 # Example data frame
 df <- data.frame(
