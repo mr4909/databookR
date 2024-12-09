@@ -58,13 +58,13 @@ df <- data.frame(
 )
 
 # Generate a codebook
-(df)
+databook(df)
 
 # Generate a codebook with additional metadata
 extra_vars <- data.frame(
   `Variable Name` = c("Age"),
   Description = c("Participant age")
 )
-(df, extra_vars = extra_vars)
+databook(df, extra_vars = extra_vars)
 
 }
