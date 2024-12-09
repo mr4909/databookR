@@ -176,14 +176,14 @@ get_logical_stats <- function(var) {
 #' )
 #'
 #' # Generate a codebook
-#' generate_codebook(df)
+#' (df)
 #'
 #' # Generate a codebook with additional metadata
 #' extra_vars <- data.frame(
 #'   `Variable Name` = c("Age"),
 #'   Description = c("Participant age")
 #' )
-#' generate_codebook(df, extra_vars = extra_vars)
+#' (df, extra_vars = extra_vars)
 #'
 #' @importFrom dplyr %>% everything bind_rows left_join rename_with
 #' @importFrom tools toTitleCase
@@ -191,7 +191,7 @@ get_logical_stats <- function(var) {
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
-generate_codebook <- function(df,
+ <- function(df,
                               hide_statistics = NULL,
                               top_n = 5,
                               extra_vars = NULL,

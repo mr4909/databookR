@@ -1,8 +1,8 @@
 ---
-title: "justiceR: A Codebook Generator"
+title: "databookR: A Codebook Generator"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to justiceR}
+  %\VignetteIndexEntry{Introduction to databookR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,40 +13,40 @@ knitr::opts_chunk$set(echo = TRUE)
 options(repos = c(CRAN = "https://cran.rstudio.com"))
 ```
 
-# Introduction to justiceR
+# Introduction to databookR
 
-**justiceR** is an R package designed to simplify the creation of detailed and customizable codebooks for datasets. Whether you're exploring a dataset for the first time or documenting it for publication, the `generate_codebook()` function provides a comprehensive overview of each variable, helping you understand the data's structure and potential issues.
+**databookR** is an R package designed to simplify the creation of detailed and customizable codebooks for datasets. Whether you're exploring a dataset for the first time or documenting it for publication, the `databook()` function provides a comprehensive overview of each variable, helping you understand the data's structure and potential issues.
 
-This vignette will introduce the features of `generate_codebook(`) and demonstrate its flexibility in handling numeric, categorical, date, and logical variables, as well as integrating additional metadata.
+This vignette will introduce the features of `databook(`) and demonstrate its flexibility in handling numeric, categorical, date, and logical variables, as well as integrating additional metadata.
 
 ------------------------------------------------------------------------
 
 ## Installation
 
-You can install the development version of **justiceR** from GitHub using the `devtools` package:
+You can install the development version of **databookR** from GitHub using the `devtools` package:
 
 ```{r eval=FALSE, include=FALSE}
 # Install devtools if you haven't already
 install.packages("devtools")
 
-# Install justiceR from GitHub
-devtools::install_github("mr4909/justiceR@develop")
+# Install databookR from GitHub
+devtools::install_github("mr4909/databookR@develop")
 ```
 
 Once installed, you can load the package:
 
 ```{r}
-library(justiceR)
+library(databookR)
 # Explicitly load all functions for vignette builds
 devtools::load_all()
 ```
 
-## Using generate_codebook()
+## Using databook()
 
-The `generate_codebook()` function is a powerful tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
+The `databook()` function is a powerful tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
 
 **Example Data** 
-To illustrate the functionality of `generate_codebook()`, let's start with a sample dataset:
+To illustrate the functionality of `databook()`, let's start with a sample dataset:
 
 ```{r}
 # Example data frame
@@ -64,7 +64,7 @@ To generate a codebook for the dataset:
 
 ```{r}
 # Generate codebook
-generate_codebook(df)
+databook(df)
 ```
 
 This will create a well-organized codebook summarizing each variable:
@@ -81,7 +81,7 @@ For some datasets, you may want to hide statistics for variables containing pers
 
 ```{r}
 # Hide statistics for the 'active' variable
-generate_codebook(
+databook(
   df,
   hide_statistics = c("active")
 )
@@ -92,11 +92,11 @@ The statistics for the active variable will be replaced with "Hidden" in the cod
 
 ### Customizing the Number of Top Categories
 
-The `generate_codebook()` function allows you to specify how many top categories should be displayed for categorical variables using the top_n parameter. By default, it shows the top 5 categories, but you can customize this to suit your needs.
+The `databook()` function allows you to specify how many top categories should be displayed for categorical variables using the top_n parameter. By default, it shows the top 5 categories, but you can customize this to suit your needs.
 
 ```{r}
 # Show only the top 2 categories for categorical variables
-generate_codebook(
+databook(
   df,
   top_n = 2
 )
@@ -107,7 +107,7 @@ Up to 2 top categories for each categorical variable will be displayed. If a var
 
 ### ntegrating Additional Metadata
 
-The `generate_codebook()` function allows you to include additional metadata about your variables, such as descriptions or notes. Use the `extra_vars` parameter to pass a data frame containing this metadata. Ensure the variable names in the dataset match the column specified in `extra_key`.
+The `databook()` function allows you to include additional metadata about your variables, such as descriptions or notes. Use the `extra_vars` parameter to pass a data frame containing this metadata. Ensure the variable names in the dataset match the column specified in `extra_key`.
 
 ```{r}
 # Additional metadata
@@ -118,7 +118,7 @@ extra_vars <- data.frame(
 )
 
 # Generate codebook with extra metadata
-generate_codebook(df, extra_vars = extra_vars, extra_key = "VariableName")
+databook(df, extra_vars = extra_vars, extra_key = "VariableName")
 ```
 
 Explanation: 
@@ -126,7 +126,7 @@ In this example, statistics for the active variable are hidden, and only the top
 
 # Conclusion
 
-The `generate_codebook()` function in justiceR is a versatile and powerful tool for exploring and documenting your data. It provides a detailed overview of your dataset's structure, helping you identify patterns and potential issues before deeper analysis. As justiceR continues to evolve, more functions will be added to aid in criminal justice data analysis, making it a comprehensive resource for researchers and analysts.
+The `databook()` function in databookR is a versatile and powerful tool for exploring and documenting your data. It provides a detailed overview of your dataset's structure, helping you identify patterns and potential issues before deeper analysis. As databookR continues to evolve, more functions will be added to aid in criminal justice data analysis, making it a comprehensive resource for researchers and analysts.
 
 # Contact and Support
 

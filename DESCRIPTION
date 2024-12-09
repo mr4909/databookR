@@ -1,5 +1,5 @@
-Package: justiceR
-Title: Criminal justice focused analysis tools
+Package: databookR
+Title: Generate data summaries
 Version: 0.0.0.9000
 Authors@R: 
     person("Mari", "Roberts", email = "mroberts@csg.org", role = c("aut", "cre"))
@@ -16,7 +16,6 @@ Imports:
     kableExtra
 Suggests:
     testthat,
-    mockery,
     rmarkdown,
     devtools
 VignetteBuilder: knitr
