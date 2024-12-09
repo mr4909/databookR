@@ -1,6 +1,6 @@
 # databookR
 
-**databookR** is an R package that provides tools for criminal justice data analysis, offering a range of functions to simplify and enhance data-driven insights in this field.
+**databookR** is an R package that simplifies the process of generating comprehensive, publication-ready summaries of datasets by creating detailed codebooks. It combines variable metadata, descriptive statistics, and insights into missing data, unique values, and categorical distributions, all presented in a clean, organized format. Designed for data analysts, researchers, and policymakers, databookR helps document datasets effortlessly.
 
 ## Installation
 
@@ -14,9 +14,9 @@ install.packages("devtools")
 devtools::install_github("mr4909/databookR@develop")
 ```
 
-## generate_codebook()
+## databook()
 
-The `generate_codebook()` function is a tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
+The `databook()` function is a tool for exploring and documenting your dataset. It generates a detailed codebook that provides descriptive statistics for each variable in your data frame. These statistics are particularly useful for understanding your data before performing more in-depth analyses.
 
 **Key Features:**
 
@@ -39,7 +39,7 @@ df <- data.frame(
 )
 
 # Generate codebook with metadata
-generate_codebook(df)
+databook(df)
 ```
 This will create a well-organized codebook summarizing each variable:
 
@@ -53,7 +53,7 @@ This will create a well-organized codebook summarizing each variable:
 Suppose you want to hide the statistics for the active variable to protect sensitive information:
 
 ``` r
-generate_codebook(
+databook(
   df, 
   hide_statistics = c("active")
 )
@@ -63,11 +63,11 @@ generate_codebook(
 
 ### Customizing Top Categories
 
-By default, generate_codebook() displays the top 5 categories for categorical variables. You can adjust this number using the top_n parameter:
+By default, databook() displays the top 5 categories for categorical variables. You can adjust this number using the top_n parameter:
 
 ``` r
 # Decrease the number of top categories displayed for the 'crime_type' variable
-generate_codebook(
+databook(
   df, 
   top_n = 2
 )
@@ -88,7 +88,7 @@ extra_vars <- data.frame(
 )
 
 # Generate codebook with metadata
-generate_codebook(df, extra_vars = extra_vars, extra_key = "VariableName")
+databook(df, extra_vars = extra_vars, extra_key = "VariableName")
 ```
 
 - extra_vars: A data frame containing metadata such as descriptions and notes about the variables in your dataset.  
