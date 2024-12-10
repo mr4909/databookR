@@ -306,7 +306,5 @@ databook <- function(df,
   codebook$Statistics <- lapply(codebook$Statistics, htmltools::HTML)
 
   knitr::kable(codebook, format = "html", escape = FALSE) %>%
-    kableExtra::kable_styling("striped", full_width = FALSE) %>%
-    kableExtra::column_spec(3, width = "10%") %>%  # Adjust "Number of Unique Values" column width
-    kableExtra::column_spec(4, width = "10%")
+    kableExtra::kable_styling("striped", full_width = FALSE)
 }
