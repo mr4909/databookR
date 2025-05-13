@@ -94,12 +94,7 @@ databook(df, extra_vars = extra_vars, extra_key = "VariableName")
 - extra_vars: A data frame containing metadata such as descriptions and notes about the variables in your dataset.  
 - extra_key: The column in extra_vars that corresponds to the variable names in the dataset. In this example, it is VariableName.  
 
-
-# License
-
-This package is licensed under the GPL-3 license. See the LICENSE file for more details.
-
 # Contact and Support
 
-Developed by Mari Roberts. For questions, feedback, or to report issues, please contact [mroberts\@csg.org](mailto:mroberts@csg.org)
+Developed by Mari Roberts. For questions, feedback, or to report issues, please contact [marialexandriaroberts@gmail.com](mailto:marialexandriaroberts@gmail.com)
 
