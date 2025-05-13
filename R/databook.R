@@ -305,6 +305,7 @@ databook <- function(df,
     dplyr::rename_with(~ tools::toTitleCase(gsub("_", " ", .)), everything())
   codebook$Statistics <- lapply(codebook$Statistics, htmltools::HTML)
 
-  knitr::kable(codebook, format = "html", escape = FALSE) %>%
-    kableExtra::kable_styling("striped", full_width = FALSE)
+  # knitr::kable(codebook, format = "html", escape = FALSE) %>%
+  #   kableExtra::kable_styling("striped", full_width = FALSE)
+  return(codebook)
 }
