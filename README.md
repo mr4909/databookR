@@ -8,10 +8,10 @@ You can install the development version of **databookR** from GitHub using the `
 
 ``` r
 # Install devtools if you haven't already
-install.packages("devtools")
+install.packages("remotes")
 
 # Install databookR from GitHub
-devtools::install_github("mr4909/databookR@develop")
+remotes::install_github("mr4909/databookR")
 ```
 
 ## databook()
